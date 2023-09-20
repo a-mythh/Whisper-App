@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 // firebase
@@ -23,6 +24,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
   bool _isAuthenticating = false;
 
+  var _enteredUsername = '';
   var _enteredEmail = '';
   var _enteredPassword = '';
   File? _selectedImage;
@@ -65,7 +67,16 @@ class _AuthScreenState extends State<AuthScreen> {
 
           await storageRef.putFile(_selectedImage!);
           final imageURL = await storageRef.getDownloadURL();
-          print(imageURL);
+
+          // upload details to database
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredentials.user!.uid)
+              .set({
+            'username': _enteredUsername,
+            'email': _enteredEmail,
+            'image_url': imageURL,
+          });
         }
       } on FirebaseAuthException catch (error) {
         if (error.code == 'INVALID_LOGIN_CREDENTIALS') {
@@ -142,6 +153,42 @@ class _AuthScreenState extends State<AuthScreen> {
                                 _selectedImage = pickedImage;
                               },
                             ),
+
+                          // Username input
+                          if (!_isLogin)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: TextFormField(
+                                onSaved: (value) => _enteredUsername = value!,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.isEmpty ||
+                                      value.trim().length < 4) {
+                                    return 'Please enter at least 4 characters.';
+                                  }
+                                  return null;
+                                },
+                                style: Theme.of(context).textTheme.titleMedium,
+                                decoration: InputDecoration(
+                                    labelText: 'Username',
+                                    prefixIcon: const Icon(
+                                      Icons.sentiment_satisfied_alt_rounded,
+                                      size: 20,
+                                    ),
+                                    prefixIconColor:
+                                        Theme.of(context).colorScheme.primary,
+                                    labelStyle: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                                keyboardType: TextInputType.name,
+                                enableSuggestions: false,
+                              ),
+                            ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+
                           // Email input
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -152,7 +199,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     value.trim().isEmpty ||
                                     !(value.contains('@') &&
                                         value.contains('.'))) {
-                                  return 'Please enter a valid email address';
+                                  return 'Please enter a valid email address.';
                                 }
                                 return null;
                               },
@@ -175,6 +222,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           const SizedBox(
                             height: 16,
                           ),
+
                           // Password input
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -183,7 +231,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               validator: (value) {
                                 if ((value == null) ||
                                     value.trim().length < 8) {
-                                  return 'Password must be at least 8 characters long';
+                                  return 'Password must be at least 8 characters long.';
                                 }
                                 return null;
                               },
@@ -208,12 +256,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           const SizedBox(height: 24),
 
                           // Loading
-                          if (_isAuthenticating)
-                          ...{
+                          if (_isAuthenticating) ...{
                             const CircularProgressIndicator(),
-                            const SizedBox(height: 10,),
+                            const SizedBox(
+                              height: 10,
+                            ),
                           },
-                          
+
                           // Not Loading
                           if (!_isAuthenticating)
                             ElevatedButton(
