@@ -1,7 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 // firebase
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+// widgets
+import 'package:chat_app/widgets/user_image_picker.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -16,53 +21,81 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
+  bool _isAuthenticating = false;
 
   var _enteredEmail = '';
   var _enteredPassword = '';
+  File? _selectedImage;
 
   @override
   Widget build(context) {
     final formKey = GlobalKey<FormState>();
 
     void submit() async {
-      if (!formKey.currentState!.validate()) {
+      final isValid = formKey.currentState!.validate();
+
+      if (!isValid || (!_isLogin && _selectedImage == null)) {
+        // show error message
         return;
       }
 
       formKey.currentState!.save();
 
       try {
+        setState(() {
+          _isAuthenticating = true;
+        });
+
         if (_isLogin) {
-          final userCredential = await _firebase.signInWithEmailAndPassword(
+          await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail,
             password: _enteredPassword,
           );
-
-          print(userCredential);
         } else {
-          final userCrendential =
+          final userCredentials =
               await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail,
             password: _enteredPassword,
           );
 
-          print(userCrendential);
+          final storageRef = FirebaseStorage.instance
+              .ref()
+              .child('user_images')
+              .child('${userCredentials.user!.uid}.jpg');
+
+          await storageRef.putFile(_selectedImage!);
+          final imageURL = await storageRef.getDownloadURL();
+          print(imageURL);
         }
       } on FirebaseAuthException catch (error) {
-        if (error.code == 'email-already-in-use') {
+        if (error.code == 'INVALID_LOGIN_CREDENTIALS') {
           // ...
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text(
+                'Invalid user credentials',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text(
+                error.message ?? 'Authentication failed.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
         }
 
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text(
-              error.message ?? 'Authentication failed.',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
+        setState(() {
+          _isAuthenticating = false;
+        });
       }
     }
 
@@ -102,6 +135,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Avatar
+                          if (!_isLogin)
+                            UserImagePicker(
+                              onPickImage: (pickedImage) {
+                                _selectedImage = pickedImage;
+                              },
+                            ),
                           // Email input
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -166,28 +206,39 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
+
+                          // Loading
+                          if (_isAuthenticating)
+                          ...{
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 10,),
+                          },
+                          
+                          // Not Loading
+                          if (!_isAuthenticating)
+                            ElevatedButton(
+                              onPressed: submit,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
                               ),
+                              child: Text(_isLogin ? 'Login' : 'Sign up'),
                             ),
-                            child: Text(_isLogin ? 'Login' : 'Sign up'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _isLogin = !_isLogin;
-                              });
-                            },
-                            child: Text(_isLogin
-                                ? 'Don\'t have an account?'
-                                : 'Already have an account?'),
-                          ),
+                          if (!_isAuthenticating)
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isLogin = !_isLogin;
+                                });
+                              },
+                              child: Text(_isLogin
+                                  ? 'Don\'t have an account?'
+                                  : 'Already have an account?'),
+                            ),
                         ],
                       ),
                     ),
