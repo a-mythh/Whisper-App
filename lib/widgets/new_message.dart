@@ -65,9 +65,9 @@ class _NewMessageState extends State<NewMessage> {
               textCapitalization: TextCapitalization.sentences,
               enableSuggestions: true,
               decoration: InputDecoration(
-                fillColor: Theme.of(context).colorScheme.secondaryContainer,
-                filled: true,
-                border: OutlineInputBorder(
+                  prefixIcon: const Icon(Icons.mail_outline_rounded),
+                  prefixIconColor: Theme.of(context).colorScheme.primary,
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
                     borderSide: BorderSide(
                       width: 1.5,

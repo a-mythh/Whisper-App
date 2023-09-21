@@ -33,7 +33,7 @@ class App extends StatelessWidget {
   @override
   Widget build(context) {
     return MaterialApp(
-      title: 'Flutter Chat',
+      title: 'Whisper',
       theme: theme,
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),

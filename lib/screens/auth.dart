@@ -119,8 +119,8 @@ class _AuthScreenState extends State<AuthScreen> {
             Theme.of(context).colorScheme.primary.withOpacity(1),
             Theme.of(context).colorScheme.primary.withOpacity(0.6),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
         )),
         child: SingleChildScrollView(
           child: Column(
@@ -133,7 +133,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   left: 20,
                   right: 20,
                 ),
-                width: 150,
+                width: 110,
                 child: Image.asset('assets/images/logo.png'),
               ),
               Card(
