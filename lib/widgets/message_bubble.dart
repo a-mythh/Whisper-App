@@ -65,7 +65,9 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   // First messages in the sequence provide a visual buffer at
                   // the top.
-                  if (isFirstInSequence) const SizedBox(height: 18),
+
+                  if (isFirstInSequence) const SizedBox(height: 20),
+
                   if (username != null)
                     Padding(
                       padding: const EdgeInsets.only(
@@ -74,9 +76,11 @@ class MessageBubble extends StatelessWidget {
                       ),
                       child: Text(
                         username!,
-                        style: const TextStyle(
+
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.tertiary,
+
                         ),
                       ),
                     ),
@@ -85,8 +89,10 @@ class MessageBubble extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: isMe
-                          ? Colors.grey[300]
-                          : theme.colorScheme.secondary.withAlpha(200),
+
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : Colors.grey.shade200,
+
                       // Only show the message bubble's "speaking edge" if first in
                       // the chain.
                       // Whether the "speaking edge" is on the left or right depends
@@ -112,7 +118,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                     // Margin around the bubble.
                     margin: const EdgeInsets.symmetric(
-                      vertical: 4,
+                      vertical: 1,
                       horizontal: 12,
                     ),
                     child: Text(
@@ -122,8 +128,8 @@ class MessageBubble extends StatelessWidget {
                         // when multilined.
                         height: 1.3,
                         color: isMe
-                            ? Colors.black87
-                            : theme.colorScheme.onSecondary,
+                            ? theme.colorScheme.onSecondaryContainer
+                            : Colors.black87,
                       ),
                       softWrap: true,
                     ),
@@ -137,3 +143,4 @@ class MessageBubble extends StatelessWidget {
     );
   }
 }
+
