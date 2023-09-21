@@ -61,7 +61,7 @@ To run this app, ensure you have Flutter installed on your machine.
 
 ### Android
 
-- [Android App](https://github.com/a-mythh/Whisper-App/raw/main/installers/Whisper.apk)
+- [Android App](https://github.com/a-mythh/Whisper-App/raw/main/installers/Whipser.apk)
 
 ## Contributing
 
