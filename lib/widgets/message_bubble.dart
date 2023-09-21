@@ -65,7 +65,9 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   // First messages in the sequence provide a visual buffer at
                   // the top.
+
                   if (isFirstInSequence) const SizedBox(height: 20),
+
                   if (username != null)
                     Padding(
                       padding: const EdgeInsets.only(
@@ -74,9 +76,11 @@ class MessageBubble extends StatelessWidget {
                       ),
                       child: Text(
                         username!,
+
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.tertiary,
+
                         ),
                       ),
                     ),
@@ -85,8 +89,10 @@ class MessageBubble extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: isMe
+
                           ? Theme.of(context).colorScheme.secondaryContainer
                           : Colors.grey.shade200,
+
                       // Only show the message bubble's "speaking edge" if first in
                       // the chain.
                       // Whether the "speaking edge" is on the left or right depends
@@ -137,3 +143,4 @@ class MessageBubble extends StatelessWidget {
     );
   }
 }
+
