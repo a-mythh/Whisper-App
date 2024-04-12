@@ -1,4 +1,4 @@
-# Whipser
+# Whisper
 
 <p align="center">
   <img src="/assets/icons/logo.png" alt="Startup" width="10%">
